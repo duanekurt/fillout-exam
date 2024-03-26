@@ -20,7 +20,7 @@ export class AppService {
     const token = this.configService.get('FILLOUT_API_KEY');
 
     // parse stringyfied filters
-    const all_filters = JSON.parse(filters.filters) ?? undefined
+    const all_filters = filters.filters ? JSON.parse(filters.filters) : undefined
 
     //parse /v1/forms/submissions
     const body = await firstValueFrom(
@@ -74,7 +74,7 @@ export class AppService {
 
     data.responses = filtered
     data.filters = all_filters
-    
+
     return data;
   }
 
