@@ -35,44 +35,47 @@ export class AppService {
     //actual filter
     const data = body.data
 
-    //map data.responses
-    const filtered = data.responses.map(item => {
+    //check if filters are existing
+    if (filters.filters) {
+      //map data.responses
+      const filtered = data.responses.map(item => {
 
-      //filter questions only key
-      const filteredQuestions = item.questions.filter(question => {
+        //filter questions only key
+        const filteredQuestions = item.questions.filter(question => {
 
-        // find if the stringyfied filters id matches some of question id
-        const condition: FilterClauseType = all_filters.find(filter => {
-          return filter.id === question.id;
+          // find if the stringyfied filters id matches some of question id
+          const condition: FilterClauseType = all_filters.find(filter => {
+            return filter.id === question.id;
+          });
+
+
+          if (!condition) return false; // Exclude if condition is not specified
+
+          // switch for conditions
+          switch (condition.condition) {
+            case "equals":
+              return question.value === condition.value;
+            case "does_not_equal":
+              return question.value !== condition.value;
+            case "greater_than":
+              return new Date(question.value) > new Date(condition.value);
+            case "less_than":
+              return new Date(question.value) < new Date(condition.value);
+            default:
+              return true;
+          }
         });
 
+        //return the filtered results
+        return {
+          ...item,
+          questions: filteredQuestions,
+        };
 
-        if (!condition) return false; // Exclude if condition is not specified
-
-        // switch for conditions
-        switch (condition.condition) {
-          case "equals":
-            return question.value === condition.value;
-          case "does_not_equal":
-            return question.value !== condition.value;
-          case "greater_than":
-            return new Date(question.value) > new Date(condition.value);
-          case "less_than":
-            return new Date(question.value) < new Date(condition.value);
-          default:
-            return true;
-        }
       });
+      data.responses = filtered
+    }
 
-      //return the filtered results
-      return {
-        ...item,
-        questions: filteredQuestions,
-      };
-
-    });
-
-    data.responses = filtered
     data.filters = all_filters
 
     return data;
